@@ -9,9 +9,12 @@
   <!-- YAML file that describes the demonstration: robots, objects-->
   <arg name="part" default="plaque-ur3"/>
   <arg name="usb_port_gripper" default="/dev/ttyUSB0"/>
+  <arg name="mqtt" default="false"/>
   
-  <!-- start hardware communication with robotiq gripper -->
-  <node name="robotiq2FGripper" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg usb_port_gripper)" respawn="true" output="screen"/>
+  <group unless="$(arg simulation)"> 
+      <!-- start hardware communication with robotiq gripper -->
+      <node name="robotiq2FGripper" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg usb_port_gripper)" respawn="true" output="screen"/>
+  </group> 
 
   <include file="$(find agimus_demos)/launch/ur3_pointing_world_setup.launch">
     <arg name="part" value="$(arg part)"/>
@@ -20,6 +23,7 @@
   <include file="$(find sot_universal_robot)/launch/controller.launch">
     <arg name="simulation" value="$(arg simulation)"/>
     <arg name="robot" value="ur"/>
+    <arg name="mqtt" value="$(arg mqtt)"/>
   </include>
 
   <!--This starts the HPP interface in namespace agimus/hpp-->
@@ -45,8 +49,8 @@
 
   <include if="$(arg estimation)" file="$(find agimus_demos)/launch/ur3_pointing_estimation.launch"/>
     
-
-  <node name="gripper_control" pkg="agimus_demos" type="gripper_control.py" respawn="true" />
-
+  <group unless="$(arg simulation)">   
+      <node name="gripper_control" pkg="agimus_demos" type="gripper_control.py" respawn="true"/>
+  </group>
   
 </launch>
